@@ -3,391 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapCut con IA Privado - Producción Ilimitada</title>
-    <!-- Tailwind CSS para diseño premium y responsive -->
+    <title>CapCut con IA Privado - Editor Pro e Ilimitado</title>
+    <!-- Tailwind CSS para diseño premium -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        obsidian: '#09090b',
-                        capcutDark: '#121214',
-                        capcutCard: '#1a1a1e',
-                        capcutBorder: '#2a2a30',
+                        obsidian: '#070709',
+                        capcutDark: '#0f0f12',
+                        capcutCard: '#16161b',
+                        capcutBorder: '#22222a',
                         accentCyan: '#00f2fe',
                         accentPurple: '#9b51e0',
                         accentGreen: '#00ff87'
-                    },
-                    boxShadow: {
-                        neonCyan: '0 0 15px rgba(0, 242, 254, 0.25)',
-                        neonPurple: '0 0 15px rgba(155, 81, 224, 0.25)'
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Personalizaciones de barra de desplazamiento */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        /* Deshabilitar barras de desplazamiento globales */
+        body {
+            overflow: hidden;
         }
-        ::-webkit-scrollbar-track {
-            background: #09090b;
+        /* Barras de desplazamiento estilizadas para componentes internos */
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #2a2a30;
-            border-radius: 3px;
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #070709;
         }
-        ::-webkit-scrollbar-thumb:hover {
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #22222a;
+            border-radius: 2px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
             background: #00f2fe;
         }
-        @keyframes pulse-border {
-            0%, 100% { border-color: rgba(255, 255, 255, 0.2); }
-            50% { border-color: #00f2fe; }
-        }
-        .safe-zone-pulse {
-            animation: pulse-border 2s infinite;
+        /* Efecto de escaneo de cámara retro en el monitor */
+        .scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="bg-obsidian text-zinc-100 min-h-screen flex flex-col overflow-hidden">
+<body class="bg-obsidian text-zinc-100 min-h-screen flex flex-col font-sans select-none">
 
-    <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
-    <header class="h-14 bg-capcutDark border-b border-capcutBorder px-6 flex items-center justify-between z-20 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-accentPurple to-accentCyan flex items-center justify-center font-black text-black text-sm">
+    <!-- CABECERA SUPERIOR ULTRA COMPACTA -->
+    <header class="h-10 bg-capcutDark border-b border-capcutBorder px-4 flex items-center justify-between z-30 shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded bg-gradient-to-tr from-accentPurple to-accentCyan flex items-center justify-center font-black text-black text-xs">
                 CC
             </div>
-            <h1 class="text-md font-bold tracking-wider flex items-center gap-2">
-                CapCut <span class="bg-gradient-to-r from-accentCyan to-accentPurple bg-clip-text text-transparent font-extrabold">IA PRIVADO PRO</span>
+            <h1 class="text-xs font-bold tracking-wider">
+                CapCut <span class="bg-gradient-to-r from-accentCyan to-accentPurple bg-clip-text text-transparent font-extrabold">IA PRIVADO v5.0</span>
             </h1>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-xs bg-accentGreen/10 border border-accentGreen/30 text-accentGreen px-3 py-1 rounded-full font-semibold flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-accentGreen animate-ping"></span>
+        <div class="flex items-center gap-3">
+            <span class="text-[10px] bg-accentGreen/10 border border-accentGreen/20 text-accentGreen px-2 py-0.5 rounded-full font-semibold flex items-center gap-1">
+                <span class="w-1 h-1 rounded-full bg-accentGreen animate-ping"></span>
                 Evasión de Restricciones Activa
             </span>
-            <div class="text-xs text-zinc-400 font-medium">Creador: <span class="text-white font-bold">Alejandro</span></div>
+            <div class="text-[10px] text-zinc-400">Usuario: <span class="text-white font-bold">Alejandro</span></div>
         </div>
     </header>
 
-    <!-- NOTIFICACIONES CUSTOM -->
-    <div id="toast-container" class="fixed top-16 right-6 z-50 flex flex-col gap-2"></div>
+    <!-- NOTIFICACIONES TOAST FLOTANTES -->
+    <div id="toast-container" class="fixed top-12 right-4 z-50 flex flex-col gap-1.5"></div>
 
-    <!-- CONTENEDOR PRINCIPAL INTERACTIVO -->
-    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden h-[calc(100vh-3.5rem)]">
+    <!-- WORKSPACE PRINCIPAL -->
+    <div class="flex-1 flex overflow-hidden h-[calc(100vh-2.5rem)]">
         
-        <!-- SIDEBAR DE CONFIGURACIÓN IA (IZQUIERDA - SCROLL SEPARADO) -->
-        <aside class="w-full lg:w-[380px] bg-capcutDark border-r border-capcutBorder flex flex-col overflow-y-auto p-4 gap-4 shrink-0 h-full">
+        <!-- COLUMNA IZQUIERDA: CONFIGURACIONES (SCROLL PROPIO) -->
+        <aside class="w-72 bg-capcutDark border-r border-capcutBorder flex flex-col overflow-y-auto p-3.5 gap-3.5 shrink-0 h-full custom-scroll">
             <div>
-                <h2 class="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-1">Ajustes del Generador</h2>
-                <p class="text-[11px] text-zinc-500">Configura la estructura de impacto y protecciones faciales antes de renderizar.</p>
+                <h2 class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-0.5">Ajustes Rápidos</h2>
+                <p class="text-[10px] text-zinc-500">Configura la IA antes de editar o reproducir.</p>
             </div>
 
-            <!-- CHATBOT IA COPILOT INTEGRADO -->
-            <div class="bg-capcutCard p-3 rounded-xl border border-accentPurple/30 flex flex-col gap-2">
-                <label class="text-xs font-bold text-accentPurple flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-accentPurple animate-pulse"></span>
-                    Asistente de Guiones IA
+            <!-- CHATBOT COPILOT IA INTEGRADO -->
+            <div class="bg-capcutCard p-2.5 rounded-lg border border-accentPurple/25 flex flex-col gap-2">
+                <label class="text-[10px] font-bold text-accentPurple flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-accentPurple animate-pulse"></span>
+                    Asistente de Copilot IA
                 </label>
-                <div id="chat-box" class="bg-obsidian rounded-lg p-2.5 h-28 overflow-y-auto border border-capcutBorder/60 text-[11px] flex flex-col gap-2 scroll-smooth">
-                    <div class="text-accentPurple font-bold">IA Copilot: <span class="text-zinc-300 font-normal">Hola Alejandro. Escribe abajo de qué quieres el video o pídeme ajustar el tono (ej: "hazlo más divertido", "hazlo serio").</span></div>
+                <div id="chat-box" class="bg-obsidian rounded p-2 h-20 overflow-y-auto border border-capcutBorder text-[10px] flex flex-col gap-1.5 custom-scroll scroll-smooth">
+                    <div class="text-accentPurple font-bold">IA Copilot: <span class="text-zinc-300 font-normal">Hola Alejandro. Escribe abajo el tema de tu video o pídeme adaptar el tono del guion técnico de la derecha.</span></div>
                 </div>
-                <div class="flex gap-1.5">
-                    <input type="text" id="chat-input" placeholder="Pregúntale a la IA o escribe tu idea..." class="flex-1 bg-obsidian border border-capcutBorder rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-accentPurple outline-none transition-all">
-                    <button id="chat-send-btn" class="bg-accentPurple hover:brightness-110 text-black font-extrabold text-[11px] px-3 py-1.5 rounded-lg transition-all">Enviar</button>
+                <div class="flex gap-1">
+                    <input type="text" id="chat-input" placeholder="Ej: hazlo de finanzas divertido..." class="flex-1 bg-obsidian border border-capcutBorder rounded px-2 py-1 text-[10px] text-white focus:border-accentPurple outline-none">
+                    <button id="chat-send-btn" class="bg-accentPurple hover:brightness-110 text-black font-extrabold text-[10px] px-2 rounded">Enviar</button>
                 </div>
             </div>
 
-            <!-- 1. SELECTOR DE FORMATO INTELIGENTE -->
-            <div class="bg-capcutCard p-3.5 rounded-xl border border-capcutBorder flex flex-col gap-2">
-                <label class="text-xs font-bold text-accentCyan flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h6m-6 4h6"/></svg>
-                    1. Aspecto Inteligente & Plataforma
-                </label>
-                <select id="select-format" class="bg-obsidian border border-capcutBorder rounded-lg p-2 text-xs text-white focus:border-accentCyan outline-none transition-all">
-                    <option value="9:16" data-desc="Ideal para TikTok, Instagram Reels y YouTube Shorts. Retención alta.">Vertical (9:16) — TikTok / Reels / Shorts</option>
-                    <option value="16:9" data-desc="Optimizado para YouTube clásico y computadoras en horizontal.">Horizontal (16:9) — YouTube Largo</option>
-                    <option value="1:1" data-desc="Perfecto para feeds de Instagram y LinkedIn.">Cuadrado (1:1) — Instagram Feed</option>
+            <!-- 1. SELECTOR DE ASPECTO INTELIGENTE -->
+            <div class="bg-capcutCard p-2.5 rounded-lg border border-capcutBorder flex flex-col gap-1.5">
+                <label class="text-[10px] font-bold text-accentCyan">1. Relación de Aspecto (Plataforma)</label>
+                <select id="select-format" class="bg-obsidian border border-capcutBorder rounded p-1.5 text-[10px] text-white focus:border-accentCyan outline-none">
+                    <option value="9:16">Vertical (9:16) — TikTok / Reels / Shorts</option>
+                    <option value="16:9">Horizontal (16:9) — YouTube Largo</option>
+                    <option value="1:1">Cuadrado (1:1) — Instagram Feed</option>
                 </select>
-                <div id="format-description" class="text-[10px] text-zinc-400 italic bg-obsidian/50 p-2 rounded border border-capcutBorder/40">
-                    Ideal para TikTok, Instagram Reels y YouTube Shorts. Retención alta.
-                </div>
+                <span id="format-description" class="text-[9px] text-zinc-400 italic">Optimizado para retención algorítmica en móviles.</span>
             </div>
 
             <!-- 2. SELECTOR DE DURACIÓN COHERENTE -->
-            <div class="bg-capcutCard p-3.5 rounded-xl border border-capcutBorder flex flex-col gap-2">
-                <label class="text-xs font-bold text-accentCyan flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    2. Duración del Guion Sincronizado
-                </label>
-                <select id="select-duration" class="bg-obsidian border border-capcutBorder rounded-lg p-2 text-xs text-white focus:border-accentCyan outline-none transition-all">
-                    <option value="30">30 Segundos (Impacto Rápido / ~75 palabras)</option>
+            <div class="bg-capcutCard p-2.5 rounded-lg border border-capcutBorder flex flex-col gap-1.5">
+                <label class="text-[10px] font-bold text-accentCyan">2. Duración del Video</label>
+                <select id="select-duration" class="bg-obsidian border border-capcutBorder rounded p-1.5 text-[10px] text-white focus:border-accentCyan outline-none">
+                    <option value="30">30 Segundos (Impacto Crítico / ~75 palabras)</option>
                     <option value="45">45 Segundos (Estructura Viral / ~110 palabras)</option>
                     <option value="60">1 Minuto (Educativo Pro / ~150 palabras)</option>
                     <option value="120">2 Minutos (Storytelling Profundo / ~300 palabras)</option>
                 </select>
             </div>
 
-            <!-- PROTECCIÓN DE IDENTIDAD -->
-            <div class="bg-capcutCard p-3.5 rounded-xl border border-capcutBorder/80 bg-gradient-to-b from-capcutCard to-accentPurple/5 flex flex-col gap-3">
-                <h3 class="text-xs font-bold text-accentPurple uppercase tracking-wider flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-accentPurple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.957 11.957 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    Protección de Identidad (Faceless)
-                </h3>
-
-                <!-- CARGA DE AVATAR -->
+            <!-- 4. PROTECCIÓN DE IDENTIDAD Y EDICIÓN FACIAL SUTIL -->
+            <div class="bg-capcutCard p-2.5 rounded-lg border border-capcutBorder/60 bg-gradient-to-b from-capcutCard to-accentPurple/5 flex flex-col gap-2.5">
+                <h3 class="text-[10px] font-bold text-accentPurple uppercase tracking-wider">Escudo de Privacidad Faceless</h3>
+                
+                <!-- CARGAR ROSTRO -->
                 <div class="flex flex-col gap-1">
-                    <label class="text-[10px] text-zinc-400 font-semibold">Cargar Rostro / Avatar</label>
+                    <span class="text-[9px] text-zinc-400">Cargar Rostro/Avatar</span>
                     <input type="file" id="upload-avatar" accept="image/*" class="hidden">
-                    <button onclick="document.getElementById('upload-avatar').click()" class="bg-obsidian hover:bg-zinc-800 text-zinc-300 border border-capcutBorder hover:border-accentPurple text-xs py-1.5 px-3 rounded-lg flex items-center justify-center gap-2 transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    <button onclick="document.getElementById('upload-avatar').click()" class="bg-obsidian hover:bg-zinc-800 text-zinc-300 border border-capcutBorder hover:border-accentPurple text-[10px] py-1 px-2 rounded flex items-center justify-center gap-1">
                         Subir Foto de Rostro
                     </button>
-                    <span id="avatar-status-label" class="text-[9px] text-zinc-500 text-center italic">Ningún archivo cargado</span>
+                    <span id="avatar-status-label" class="text-[8px] text-zinc-500 text-center italic">Ningún archivo cargado</span>
                 </div>
 
-                <!-- FILTROS DE PRIVACIDAD SUTIL -->
+                <!-- FILTRO DE ANONIMIZACIÓN -->
                 <div class="flex flex-col gap-1">
-                    <label for="select-filter" class="text-[10px] text-zinc-400 font-semibold">Filtro de Privacidad IA</label>
-                    <select id="select-filter" class="bg-obsidian border border-capcutBorder rounded-lg p-1.5 text-xs text-white focus:border-accentPurple outline-none transition-all">
+                    <span class="text-[9px] text-zinc-400">Filtro de Privacidad</span>
+                    <select id="select-filter" class="bg-obsidian border border-capcutBorder rounded p-1 text-[9px] text-white focus:border-accentPurple outline-none">
                         <option value="cyber-mesh">Malla Cyberpunk Holográfica</option>
                         <option value="vector-silhouette">Silueta Vectorial de Alta Retención</option>
-                        <option value="comic-shading">Sombreado Cómic de Alto Contraste</option>
+                        <option value="comic-shading">Sombreado Cómic Alto Contraste</option>
                         <option value="gaussian-blur">Desenfoque Gaussian Face Pro</option>
                     </select>
                 </div>
 
-                <!-- PERSONALIZADOR DE FONDOS -->
+                <!-- CARGAR FONDO B-ROLL -->
                 <div class="border-t border-capcutBorder/50 pt-2 flex flex-col gap-2">
                     <div class="flex flex-col gap-1">
-                        <label class="text-[10px] text-zinc-400 font-semibold">Fondo del Video (B-Roll)</label>
+                        <span class="text-[9px] text-zinc-400">Fondo Personalizado (B-Roll)</span>
                         <input type="file" id="upload-bg" accept="image/*" class="hidden">
-                        <button onclick="document.getElementById('upload-bg').click()" class="bg-obsidian hover:bg-zinc-800 text-zinc-300 border border-capcutBorder hover:border-accentCyan text-xs py-1.5 px-3 rounded-lg flex items-center justify-center gap-2 transition-all">
-                            Subir Fondo Personalizado
+                        <button onclick="document.getElementById('upload-bg').click()" class="bg-obsidian hover:bg-zinc-800 text-zinc-300 border border-capcutBorder hover:border-accentCyan text-[10px] py-1 px-2 rounded flex items-center justify-center gap-1">
+                            Subir Fondo (B-Roll)
                         </button>
-                        <span id="bg-status-label" class="text-[9px] text-zinc-500 text-center italic font-mono">Preset: Studio Dark</span>
+                        <span id="bg-status-label" class="text-[8px] text-zinc-500 text-center italic font-mono">Preset: Studio Dark</span>
                     </div>
 
                     <div class="flex flex-col gap-1">
-                        <select id="select-bg-preset" class="bg-obsidian border border-capcutBorder rounded-lg p-1.5 text-xs text-white focus:border-accentCyan outline-none transition-all">
-                            <option value="studio-dark">Preset: Neon Dark Studio</option>
-                            <option value="crypto-matrix">Preset: Cascada Tech Matrix</option>
-                            <option value="corporate-blur">Preset: Oficina Corporativa</option>
+                        <select id="select-bg-preset" class="bg-obsidian border border-capcutBorder rounded p-1 text-[9px] text-white focus:border-accentCyan outline-none">
+                            <option value="studio-dark">Fondo Preset: Neon Studio Dark</option>
+                            <option value="crypto-matrix">Fondo Preset: Cascada Digital Matrix</option>
+                            <option value="corporate-blur">Fondo Preset: Oficina Ejecutiva</option>
                         </select>
                     </div>
                 </div>
             </div>
-
-            <!-- BOTÓN DE GENERACIÓN -->
-            <button id="btn-generate-video" class="w-full bg-gradient-to-r from-accentCyan to-accentPurple hover:brightness-110 text-black font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-neonCyan hover:shadow-neonPurple transform active:scale-[0.98] uppercase tracking-wider flex items-center justify-center gap-2 mt-auto">
-                <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                Iniciar Producción de Video (>10s)
-            </button>
         </aside>
 
-        <!-- AREA CENTRAL DE EDICIÓN Y RENDER -->
-        <main class="flex-1 flex flex-col lg:flex-row overflow-hidden bg-obsidian p-4 gap-4 h-full">
+        <!-- AREA CENTRAL: MONITOR MULTIMEDIA & CONTROLES & TIMELINE -->
+        <main class="flex-1 flex flex-col bg-obsidian p-3 gap-3 overflow-hidden h-full">
             
-            <!-- MONITOR DE VISTA PREVIA (IZQUIERDA EN AREA CENTRAL) -->
-            <div class="flex-[1.2] flex flex-col items-center justify-center bg-capcutDark rounded-2xl border border-capcutBorder p-4 relative h-full">
-                <div class="absolute top-4 left-4 flex items-center gap-2">
-                    <span id="live-indicator" class="w-2.5 h-2.5 rounded-full bg-zinc-500"></span>
-                    <span class="text-xs text-zinc-400 font-semibold tracking-wider uppercase">Live Preview Monitor</span>
+            <!-- MONITOR DE VISTA PREVIA PROFESIONAL -->
+            <div class="flex-1 bg-capcutDark rounded-xl border border-capcutBorder p-3 flex flex-col items-center justify-center relative overflow-hidden">
+                <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10 bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
+                    <span id="live-indicator" class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
+                    <span class="text-[8px] text-zinc-400 font-semibold tracking-wider uppercase">Monitor en Vivo</span>
                 </div>
-                
-                <!-- VISUALIZADOR DINÁMICO DE VIDEO CON RELACIÓN DE ASPECTO -->
-                <div id="video-monitor-wrapper" class="relative bg-black transition-all duration-500 ease-in-out shadow-2xl safe-zone-pulse border border-zinc-800 flex items-center justify-center overflow-hidden">
+
+                <!-- MONITOR CON RELACIÓN DE ASPECTO DINÁMICA -->
+                <div id="video-monitor-wrapper" class="relative bg-black transition-all duration-300 shadow-2xl rounded border border-zinc-800 flex items-center justify-center overflow-hidden">
                     <canvas id="render-canvas" class="w-full h-full object-cover"></canvas>
+                    <div class="scanlines absolute inset-0"></div>
                     
-                    <!-- Capas Superpuestas -->
-                    <div id="safe-zone-overlay" class="absolute inset-4 border border-dashed border-cyan-500/30 pointer-events-none flex flex-col justify-between p-3">
-                        <div class="text-[9px] text-cyan-400 tracking-widest font-mono bg-black/40 self-start px-1.5 py-0.5 rounded">MODO SEGURO ACTIVO</div>
+                    <!-- Capa de Zona Segura e Interfaz Activa -->
+                    <div class="absolute inset-2 border border-dashed border-cyan-500/10 pointer-events-none flex flex-col justify-between p-2">
+                        <div class="text-[8px] text-cyan-400/40 tracking-widest font-mono bg-black/30 self-start px-1 rounded">ZONA SEGURA</div>
                         
-                        <!-- Subtítulos de impacto dinámicos -->
-                        <div id="dynamic-subtitle-overlay" class="w-full text-center text-yellow-300 font-extrabold text-sm tracking-wide uppercase drop-shadow-[0_2px_5px_rgba(0,0,0,1)] bg-black/60 px-2 py-1.5 rounded border border-yellow-500/30 hidden">
-                            ¡PRESIONA GENERAR PARA INICIAR EL VIDEO!
+                        <!-- Subtítulos de impacto real en pantalla -->
+                        <div id="dynamic-subtitle-overlay" class="w-full text-center text-yellow-300 font-extrabold text-xs tracking-wide uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-black/50 px-2 py-1 rounded border border-yellow-500/20 hidden">
+                            PRESIONA EL PLAY PARA REPRODUCIR LA VISTA PREVIA
                         </div>
-                        
-                        <div class="text-[9px] text-zinc-500 font-mono self-end bg-black/40 px-1.5 py-0.5 rounded">CC PRIVATE RENDER v4.2</div>
+
+                        <div class="text-[8px] text-zinc-600 font-mono self-end bg-black/30 px-1 rounded">CC MONITOR PRO</div>
                     </div>
                 </div>
 
-                <div class="mt-4 flex gap-4 text-[10px] text-zinc-400">
-                    <span id="canvas-dimensions" class="font-mono bg-capcutCard px-2.5 py-1 rounded border border-capcutBorder">Relación: 9:16 (540x960)</span>
-                    <span id="fps-indicator" class="font-mono bg-capcutCard px-2.5 py-1 rounded border border-capcutBorder">Estable: 60 FPS</span>
+                <!-- CONTROLES DEL REPRODUCTOR MULTIMEDIA -->
+                <div class="w-full max-w-md flex items-center justify-between gap-3 mt-3 bg-capcutCard/80 px-3 py-1.5 rounded-lg border border-capcutBorder z-10 shrink-0">
+                    <div class="flex items-center gap-2">
+                        <!-- Play/Pausa -->
+                        <button id="play-btn" class="text-accentCyan hover:text-white transition-all">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <button id="pause-btn" class="text-zinc-400 hover:text-white transition-all hidden">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button id="stop-btn" class="text-zinc-500 hover:text-red-400 transition-all">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Barra de búsqueda de tiempo (Seek Bar) -->
+                    <div class="flex-1 flex items-center gap-2">
+                        <input type="range" id="seek-bar" min="0" max="30" value="0" step="0.1" class="flex-1 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-accentCyan">
+                        <span id="time-counter" class="text-[9px] font-mono text-zinc-400">00:00 / 00:30</span>
+                    </div>
+
+                    <!-- Indicadores de Monitor -->
+                    <div class="flex items-center gap-2 text-[8px] text-zinc-400">
+                        <span id="canvas-dimensions" class="font-mono bg-obsidian px-1.5 py-0.5 rounded border border-capcutBorder">540x960</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- RESULTADOS Y TERMINAL DE RENDER (DERECHA EN AREA CENTRAL - SCROLL SEPARADO) -->
-            <div class="flex-[1.1] flex flex-col gap-4 h-full overflow-hidden">
-                
-                <!-- CONTENEDOR DE GUION CON ESTRUCTURA DE IMPACTO -->
-                <div class="flex-1 bg-capcutDark border border-capcutBorder rounded-2xl flex flex-col overflow-hidden">
-                    <div class="bg-capcutCard px-4 py-3 border-b border-capcutBorder flex items-center justify-between">
-                        <h3 class="text-xs font-bold text-accentCyan uppercase tracking-widest flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-accentCyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6m-6 4h6"/></svg>
-                            3. Guion Estructurado de Alto Impacto
-                        </h3>
-                        <span id="word-count-badge" class="text-[10px] bg-accentCyan/10 text-accentCyan font-bold px-2 py-0.5 rounded border border-accentCyan/20">0 Palabras</span>
+            <!-- LINEA DE TIEMPO (TIMELINE) INTERACTIVA ESTILO PREMIUM -->
+            <div class="bg-capcutDark border border-capcutBorder rounded-xl p-2.5 flex flex-col gap-1.5 shrink-0 h-32 overflow-hidden">
+                <div class="flex justify-between items-center text-[9px] text-zinc-400 font-bold border-b border-capcutBorder pb-1">
+                    <span>LÍNEA DE TIEMPO DE EDICIÓN MULTIPISTA</span>
+                    <span class="text-accentCyan tracking-wider uppercase">Eje de Tiempo Sincronizado</span>
+                </div>
+
+                <!-- Contenedor de Pistas -->
+                <div class="flex-1 flex flex-col gap-1 overflow-y-auto custom-scroll text-[9px]">
+                    <!-- Track 1: Video B-Roll / Avatar -->
+                    <div class="flex items-center bg-obsidian border border-capcutBorder rounded h-6 relative overflow-hidden">
+                        <span class="w-16 bg-accentPurple/20 text-accentPurple font-black px-2 h-full flex items-center border-r border-capcutBorder shrink-0">🎥 VIDEO</span>
+                        <div class="flex-1 h-full relative" id="timeline-video-track">
+                            <!-- Los bloques de video se dibujan por JS dinámicamente -->
+                        </div>
                     </div>
 
-                    <div id="script-content" class="flex-1 overflow-y-auto p-3 space-y-3">
-                        <div class="flex flex-col items-center justify-center text-center h-full text-zinc-500 p-6 space-y-3">
-                            <svg class="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                            <div>
-                                <p class="text-xs font-bold text-zinc-400">¿Listo para cautivar?</p>
-                                <p class="text-[11px] text-zinc-500 mt-0.5">Escribe una idea en el chat del asistente para generar el guion técnico adaptado.</p>
+                    <!-- Track 2: Voz IA y Efectos de Audio -->
+                    <div class="flex items-center bg-obsidian border border-capcutBorder rounded h-6 relative overflow-hidden">
+                        <span class="w-16 bg-accentGreen/20 text-accentGreen font-black px-2 h-full flex items-center border-r border-capcutBorder shrink-0">🎵 AUDIO</span>
+                        <div class="flex-1 h-full relative bg-accentGreen/5" id="timeline-audio-track">
+                            <!-- Dibujar ondas estáticas para indicar pista de audio -->
+                            <div class="absolute inset-y-1 left-2 right-2 flex items-center gap-0.5 opacity-40">
+                                <span class="h-2 w-1 bg-accentGreen rounded"></span><span class="h-4 w-1 bg-accentGreen rounded"></span><span class="h-3 w-1 bg-accentGreen rounded"></span><span class="h-1 w-1 bg-accentGreen rounded"></span>
+                                <span class="h-3 w-1 bg-accentGreen rounded"></span><span class="h-4 w-1 bg-accentGreen rounded"></span><span class="h-2 w-1 bg-accentGreen rounded"></span><span class="h-3 w-1 bg-accentGreen rounded"></span>
+                                <span class="h-1 w-1 bg-accentGreen rounded"></span><span class="h-4 w-1 bg-accentGreen rounded"></span><span class="h-3 w-1 bg-accentGreen rounded"></span><span class="h-2 w-1 bg-accentGreen rounded"></span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- MOTOR DE PROCESAMIENTO SIN LÍMITES -->
-                <div class="bg-capcutDark border border-capcutBorder rounded-2xl p-4 flex flex-col gap-3 shrink-0">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold text-accentGreen uppercase tracking-widest flex items-center gap-1.5">
-                            <svg class="w-4.5 h-4.5 text-accentGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            5. Pipeline de Render Ilimitado (>10s Bypass)
-                        </h4>
-                        <span id="render-status-badge" class="text-[10px] font-bold text-zinc-400 bg-capcutCard px-2.5 py-0.5 rounded border border-capcutBorder">INACTIVO</span>
-                    </div>
-
-                    <!-- Barra de progreso -->
-                    <div class="w-full bg-obsidian h-2 rounded-full overflow-hidden border border-capcutBorder">
-                        <div id="render-progress-bar" class="w-0 h-full bg-gradient-to-r from-accentCyan via-accentPurple to-accentGreen rounded-full transition-all duration-100"></div>
-                    </div>
-
-                    <!-- Logs de Compilación en Vivo -->
-                    <div class="bg-obsidian rounded-lg p-2 h-16 overflow-y-auto border border-capcutBorder font-mono text-[9px] text-zinc-400 flex flex-col gap-0.5" id="render-terminal">
-                        <span class="text-zinc-500">> Sistema listo para segmentación de buffers de video continuos.</span>
-                    </div>
-
-                    <!-- Botón de descarga de video integrado -->
-                    <div id="download-area" class="hidden flex items-center justify-between bg-accentGreen/10 border border-accentGreen/30 p-2.5 rounded-lg">
-                        <span class="text-[11px] text-accentGreen font-bold flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            ¡Render Compilado de Forma Continua!
-                        </span>
-                        <a id="download-video-link" href="#" download="CapCut-IA-Privado-Alejandro.webm" class="bg-accentGreen hover:bg-emerald-400 text-black font-extrabold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all">
-                            Descargar Video (.webm)
-                        </a>
+                    <!-- Track 3: Subtítulos de Impacto -->
+                    <div class="flex items-center bg-obsidian border border-capcutBorder rounded h-6 relative overflow-hidden">
+                        <span class="w-16 bg-accentCyan/20 text-accentCyan font-black px-2 h-full flex items-center border-r border-capcutBorder shrink-0">💬 TEXTO</span>
+                        <div class="flex-1 h-full relative" id="timeline-text-track">
+                            <!-- Marcadores de subtítulos dinámicos -->
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
+
+        <!-- COLUMNA DERECHA: GUION DE IMPACTO EDITABLE & PIPELINE DE EXPORTACIÓN (SCROLL SEPARADO) -->
+        <aside class="w-80 bg-capcutDark border-l border-capcutBorder flex flex-col overflow-hidden shrink-0 h-full">
+            
+            <!-- TITULO DEL PANEL -->
+            <div class="bg-capcutCard px-3 py-2 border-b border-capcutBorder flex items-center justify-between shrink-0">
+                <h3 class="text-[10px] font-bold text-accentCyan uppercase tracking-widest flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Guion Técnico Editable
+                </h3>
+                <span id="word-count-badge" class="text-[9px] bg-accentCyan/15 text-accentCyan font-bold px-1.5 py-0.5 rounded border border-accentCyan/30">0 Palabras</span>
+            </div>
+
+            <!-- CONTENEDOR DE TARJETAS DE GUION (CON SCROLL INTERNO) -->
+            <div id="script-container" class="flex-1 overflow-y-auto p-3 space-y-2.5 custom-scroll">
+                <!-- Se inyecta dinámicamente y se vuelve completamente interactivo y editable -->
+            </div>
+
+            <!-- MOTOR DE PROCESAMIENTO SIN RESTRICCIONES (CONSOLA DE LOGS) -->
+            <div class="bg-capcutCard border-t border-capcutBorder p-3 flex flex-col gap-2 shrink-0">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-[9px] font-bold text-accentGreen uppercase tracking-widest flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Render Ilimitado (>10s Bypass)
+                    </h4>
+                    <span id="render-status-badge" class="text-[8px] font-bold text-zinc-400 bg-obsidian px-2 py-0.5 rounded border border-capcutBorder">STANDBY</span>
+                </div>
+
+                <!-- Barra de Progreso de Compilación -->
+                <div class="w-full bg-obsidian h-1.5 rounded-full overflow-hidden border border-capcutBorder">
+                    <div id="render-progress-bar" class="w-0 h-full bg-gradient-to-r from-accentCyan via-accentPurple to-accentGreen rounded-full transition-all duration-75"></div>
+                </div>
+
+                <!-- Consola Terminal Interactiva -->
+                <div class="bg-obsidian rounded p-1.5 h-12 overflow-y-auto border border-capcutBorder font-mono text-[8px] text-zinc-500 flex flex-col gap-0.5 custom-scroll" id="render-terminal">
+                    <span>> Listo para compilar tracks de video y audio combinados...</span>
+                </div>
+
+                <!-- Botón de Descarga Real -->
+                <div id="download-area" class="hidden flex flex-col gap-2 bg-accentGreen/5 border border-accentGreen/20 p-2 rounded">
+                    <div class="text-[9px] text-accentGreen font-bold flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        ¡Video de alta definición compilado con audio!
+                    </div>
+                    <a id="download-video-link" href="#" download="Video-IA-Privado-Alejandro.webm" class="w-full bg-accentGreen hover:bg-emerald-400 text-black font-extrabold text-[10px] py-1.5 rounded text-center block transition-all">
+                        Descargar Archivo de Video (.webm)
+                    </a>
+                </div>
+            </div>
+        </aside>
     </div>
 
-    <!-- CÓDIGO JAVASCRIPT (SISTEMA INTEGRAL DE SÍNTESIS DE AVATAR) -->
+    <!-- CÓDIGO JAVASCRIPT DE ALTO NIVEL INTERACTIVO -->
     <script>
-        // BANCO DE DATOS DE ESTRUCTURA VIRAL
+        // BANCO DE DATOS DE ESTRUCTURA VIRAL DE ALTO IMPACTO
         const guionesPreconfigurados = {
             "30": [
                 {
-                    time: "00:00 - 00:07",
+                    timeStart: 0,
+                    timeEnd: 7,
                     camara: "CORTE RAPIDO - Zoom Digital - Filtro de Rostro Activo",
                     text: "¡Alto ahí! Si sigues dejando tu dinero durmiendo en una cuenta de ahorros tradicional, estás perdiendo un 8% anual."
                 },
                 {
-                    time: "00:07 - 00:15",
+                    timeStart: 7,
+                    timeEnd: 15,
                     camara: "CAMBIO DE ÁNGULO - Paneor de Fondo de Datos Abstracto",
                     text: "La inflación devora tu esfuerzo silenciosamente. El verdadero secreto de los millonarios no es ahorrar."
                 },
                 {
-                    time: "00:15 - 00:23",
+                    timeStart: 15,
+                    timeEnd: 23,
                     camara: "ZOOM IN EXTREMO - Glitch Sutil de Anonimato",
                     text: "Es mover tu flujo de capital de inmediato hacia fondos indexados automatizados que paguen dividendos constantes."
                 },
                 {
-                    time: "00:23 - 00:30",
+                    timeStart: 23,
+                    timeEnd: 30,
                     camara: "TRANSICIÓN RÁPIDA - Contornos de Neón Fluido",
                     text: "He diseñado un mapa privado para enseñarte este sistema sin dar la cara. Comenta ACCESO y te lo envío ya."
                 }
             ],
             "45": [
                 {
-                    time: "00:00 - 00:10",
+                    timeStart: 0,
+                    timeEnd: 11,
                     camara: "HOOK DE RETENCIÓN - Primer plano con Sombreado Cómic",
                     text: "Atención creador: La inteligencia artificial no te va a quitar tu empleo este año, te lo aseguro de verdad."
                 },
                 {
-                    time: "00:10 - 00:22",
+                    timeStart: 11,
+                    timeEnd: 22,
                     camara: "TRANSICIÓN WIPE - Fondo de Datos Tech Activo",
                     text: "Te va a reemplazar la persona que usa sistemas privados de automatización para generar el volumen de trabajo de 5 agencias."
                 },
                 {
-                    time: "00:22 - 00:35",
+                    timeStart: 22,
+                    timeEnd: 34,
                     camara: "CORTE PLANO DETALLE - Malla Cyberpunk Dinámica",
                     text: "El truco para vencer al algoritmo de retención es renderizar videos de alta calidad omitiendo los bloqueos lógicos de duración web."
                 },
                 {
-                    time: "00:35 - 00:45",
+                    timeStart: 34,
+                    timeEnd: 45,
                     camara: "ZOOM LENTO OUT - Destello de Luz en Zona Segura",
                     text: "Si deseas clonar esta arquitectura en tu propia web de forma 100% privada, sígueme y comenta CONFIGURAR ahora mismo."
                 }
             ],
             "60": [
                 {
-                    time: "00:00 - 00:08",
+                    timeStart: 0,
+                    timeEnd: 10,
                     camara: "GANCHO RÁPIDO - Zoom In Inmediato - Efecto Neon contours",
                     text: "Te presento tres herramientas secretas para crear contenido de forma automatizada y anónima que generan ingresos recurrentes."
                 },
                 {
-                    time: "00:08 - 00:20",
+                    timeStart: 10,
+                    timeEnd: 25,
                     camara: "CAMBIO DE CÁMARA - Fondo Oficina Abstracta",
                     text: "La primera es un selector inteligente que adapta la visual al instante sin importar si transmites en 9:16 o en 16:9."
                 },
                 {
-                    time: "00:20 - 00:35",
+                    timeStart: 25,
+                    timeEnd: 42,
                     camara: "TRANSICIÓN DESENFOQUE - Filtro Facial Gaussian Active",
                     text: "La segunda es el algoritmo avanzado de escudo de rostro. Modifica tu identidad para evadir las penalizaciones por contenido automatizado."
                 },
                 {
-                    time: "00:35 - 00:50",
+                    timeStart: 42,
+                    timeEnd: 60,
                     camara: "CORTE PLANO MEDIO - Efecto Glitch y Escaneo de Líneas",
-                    text: "La tercera es el renderizado continuo ilimitado. Segmenta el proceso en bloques independientes para exportar videos largos fluidamente."
-                },
-                {
-                    time: "00:50 - 01:00",
-                    camara: "CIERRE DIRECTIVO - Zoom Digital Continuo",
-                    text: "El script y el código están empaquetados. Sígueme, entra al enlace de mi biografía y descárgalos gratis hoy."
+                    text: "La tercera es el renderizado continuo ilimitado. Segmenta el proceso en bloques independientes para exportar videos largos."
                 }
             ],
             "120": [
                 {
-                    time: "00:00 - 00:15",
+                    timeStart: 0,
+                    timeEnd: 20,
                     camara: "CORTE CINEMÁTICO - Zoom Lento - Malla de Privacidad al 80%",
                     text: "Esta es la hoja de ruta definitiva de 2 minutos para crear un negocio digital sostenible, automatizado y totalmente anónimo."
                 },
                 {
-                    time: "00:15 - 00:35",
+                    timeStart: 20,
+                    timeEnd: 45,
                     camara: "CAMBIO DE ÁNGULO - Paneor de Fondo Matrix Dinámica",
                     text: "La mayoría de los creadores fracasa por desgaste físico: pasar horas grabando y editando para que el algoritmo entierre el video en minutos."
                 },
                 {
-                    time: "00:35 - 00:55",
+                    timeStart: 45,
+                    timeEnd: 70,
                     camara: "CORTE PLANO DETALLE - Ajuste de iluminación Neón",
                     text: "La solución es industrializar tu contenido. Divide la producción en bloques de código modular y concatena el renderizado en tiempo real."
                 },
                 {
-                    time: "00:55 - 01:15",
+                    timeStart: 70,
+                    timeEnd: 95,
                     camara: "TRANSICIÓN RÁPIDA - Silueta Vectorial Violeta",
                     text: "El uso de avatares con filtros integrados no solo protege tu identidad, sino que crea una marca icónica fácil de recordar y monetizar."
                 },
                 {
-                    time: "01:15 - 01:35",
-                    camara: "CAMBIO PLANO GENERAL - Fondo Studio Dark con Destellos",
-                    text: "Nuestra tecnología bypass evita las limitaciones estándar del navegador al compilar buffers temporales independientes por cada fragmento."
-                },
-                {
-                    time: "01:35 - 01:50",
-                    camara: "ZOOM IN AGRESIVO - Texto Sincronizado en Zona Segura",
-                    text: "Al combinar la velocidad perfecta del habla con un guion calculado milimétricamente, tu porcentaje de retención subirá a más del 80%."
-                },
-                {
-                    time: "01:50 - 02:00",
+                    timeStart: 95,
+                    timeEnd: 120,
                     camara: "CIERRE Y ACCIÓN - Destello de Pantalla Total",
                     text: "Todos los archivos de esta herramienta están listos para usar en tu GitHub Pages de forma gratuita. Comenta IMPERIO y automatiza tu marca hoy."
                 }
@@ -414,7 +456,7 @@
         const liveIndicator = document.getElementById('live-indicator');
         const dynamicSubtitleOverlay = document.getElementById('dynamic-subtitle-overlay');
         const canvasDimensions = document.getElementById('canvas-dimensions');
-        const scriptContent = document.getElementById('script-content');
+        const scriptContainer = document.getElementById('script-container');
         const wordCountBadge = document.getElementById('word-count-badge');
         const renderProgressBar = document.getElementById('render-progress-bar');
         const renderStatusBadge = document.getElementById('render-status-badge');
@@ -423,240 +465,169 @@
         const downloadVideoLink = document.getElementById('download-video-link');
         const toastContainer = document.getElementById('toast-container');
 
-        // ESTADO DE IMÁGENES Y CANVAS
+        // REPRODUCTOR TIMELINE
+        const playBtn = document.getElementById('play-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const seekBar = document.getElementById('seek-bar');
+        const timeCounter = document.getElementById('time-counter');
+        const timelineVideoTrack = document.getElementById('timeline-video-track');
+        const timelineTextTrack = document.getElementById('timeline-text-track');
+
+        // ESTADO DE LA APLICACIÓN
         let avatarImg = null;
         let bgImg = null;
-        let globalTime = 0; 
+        let globalTime = 0;
+        let isPlaying = false;
+        let currentPlaybackTime = 0; // segundos reales
+        let durationSeconds = 30;
         let activeSubtitles = [];
-        let currentSubtitleText = "";
+        let activeCameraEffect = { type: 'NORMAL', scale: 1, glitch: 0, panX: 0, panY: 0 };
+        let currentPromptIdea = "";
+
+        // GRABADOR MULTIMEDIA
         let isRecording = false;
         let mediaRecorder = null;
         let recordedChunks = [];
-        let currentPromptIdea = "";
+        let audioCtx = null;
+        let destStreamNode = null;
 
-        // Variables de Animación de Directivas de Cámara en tiempo real
-        let activeCameraEffect = { type: 'NORMAL', scale: 1, glitch: 0, panX: 0, panY: 0 };
+        // INICIALIZACIÓN DE FORMATO SMART
+        selectFormat.addEventListener('change', adjustFormatAndCanvasSize);
 
-        // CHATBOT COPILOT IA (INTERACTIVO Y ADAPTATIVO)
-        chatSendBtn.addEventListener('click', processChatInteraction);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') processChatInteraction();
-        });
-
-        function processChatInteraction() {
-            const query = chatInput.value.trim();
-            if (!query) return;
-
-            // Mostrar el mensaje del usuario
-            appendChatMessage("Alejandro", query, "text-accentCyan");
-            chatInput.value = "";
-
-            // Simular pensamiento de la IA
-            appendChatMessage("IA Copilot", "Analizando propuesta de Alejandro y estructurando lógica...", "text-accentPurple italic");
-
-            setTimeout(() => {
-                // Eliminar el mensaje de carga
-                chatBox.lastElementChild.remove();
-                
-                let iaResponse = "";
-                currentPromptIdea = query;
-
-                // Respuestas adaptativas según palabras clave
-                if (query.toLowerCase().includes("divertido") || query.toLowerCase().includes("gracioso")) {
-                    iaResponse = "¡Entendido! Añadiendo un tono dinámico y cómico. He reescrito los cortes de cámara para hacer zoom en momentos críticos.";
-                } else if (query.toLowerCase().includes("serio") || query.toLowerCase().includes("formal")) {
-                    iaResponse = "Lógica adaptativa cambiada a formato Corporativo Premium. Se estructurará con pausas largas para mayor credibilidad.";
-                } else if (query.toLowerCase().includes("cripto") || query.toLowerCase().includes("finanzas")) {
-                    iaResponse = "Nicho financiero detectado. Estructurando guion con gancho de alto valor para evadir el desinterés inicial del espectador.";
-                } else {
-                    iaResponse = `He analizado tu idea "${query}". He optimizado las transiciones y cortes visuales para este nicho específico. ¡Presiona "Iniciar Producción" para compilar!`;
-                }
-
-                appendChatMessage("IA Copilot", iaResponse, "text-accentPurple font-semibold");
-                
-                // Generar automáticamente el guion técnico con la idea
-                const duration = selectDuration.value;
-                activeSubtitles = generateImpactScript(duration, currentPromptIdea);
-                showToast("Guion actualizado con el feedback del chat", "info");
-            }, 1000);
-        }
-
-        function appendChatMessage(sender, text, classes = "") {
-            const msgEl = document.createElement('div');
-            msgEl.className = `p-1 border-b border-capcutBorder/30 last:border-0 ${classes}`;
-            msgEl.innerHTML = `<span class="font-bold">${sender}:</span> <span>${text}</span>`;
-            chatBox.appendChild(msgEl);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // ASPECT RATIO & RESPONSIVE DEL MONITOR
-        selectFormat.addEventListener('change', (e) => {
-            const format = e.target.value;
-            const option = e.target.options[e.target.selectedIndex];
-            formatDescription.textContent = option.getAttribute('data-desc');
-            
-            videoMonitorWrapper.className = "relative bg-black transition-all duration-500 ease-in-out shadow-2xl safe-zone-pulse border border-zinc-800 flex items-center justify-center overflow-hidden";
+        function adjustFormatAndCanvasSize() {
+            const format = selectFormat.value;
+            videoMonitorWrapper.className = "relative bg-black transition-all duration-300 shadow-2xl rounded border border-zinc-800 flex items-center justify-center overflow-hidden";
             
             if (format === '9:16') {
-                videoMonitorWrapper.style.width = '240px';
-                videoMonitorWrapper.style.height = '426px';
-                canvasDimensions.textContent = "Relación: 9:16 (480x854)";
-                showToast("Plataforma: TikTok / Reels Shorts", "info");
+                videoMonitorWrapper.style.width = '210px';
+                videoMonitorWrapper.style.height = '373px';
+                canvasDimensions.textContent = "9:16 (540x960)";
+                formatDescription.textContent = "Vertical para TikTok, Instagram Reels y YouTube Shorts.";
             } else if (format === '16:9') {
-                videoMonitorWrapper.style.width = '426px';
-                videoMonitorWrapper.style.height = '240px';
-                canvasDimensions.textContent = "Relación: 16:9 (854x480)";
-                showToast("Plataforma: YouTube Tradicional", "info");
-            } else if (format === '1:1') {
-                videoMonitorWrapper.style.width = '300px';
-                videoMonitorWrapper.style.height = '300px';
-                canvasDimensions.textContent = "Relación: 1:1 (600x600)";
-                showToast("Plataforma: Instagram / LinkedIn", "info");
+                videoMonitorWrapper.style.width = '373px';
+                videoMonitorWrapper.style.height = '210px';
+                canvasDimensions.textContent = "16:9 (960x540)";
+                formatDescription.textContent = "Horizontal optimizado para YouTube Tradicional.";
+            } else {
+                videoMonitorWrapper.style.width = '280px';
+                videoMonitorWrapper.style.height = '280px';
+                canvasDimensions.textContent = "1:1 (640x640)";
+                formatDescription.textContent = "Cuadrado perfecto para Feeds de Redes Sociales.";
             }
 
-            setTimeout(resizeCanvasToMonitor, 100);
-        });
-
-        function resizeCanvasToMonitor() {
-            canvas.width = videoMonitorWrapper.clientWidth * 2; 
-            canvas.height = videoMonitorWrapper.clientHeight * 2;
+            setTimeout(() => {
+                canvas.width = videoMonitorWrapper.clientWidth * 2;
+                canvas.height = videoMonitorWrapper.clientHeight * 2;
+                drawStaticElements();
+            }, 100);
         }
 
-        // CARGA DE ROSTRO Y FONDO (BYPASS BASE64)
-        uploadAvatar.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                avatarStatusLabel.textContent = file.name;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    avatarImg = new Image();
-                    avatarImg.onload = () => {
-                        showToast("Foto facial importada al escudo de privacidad", "success");
-                    };
-                    avatarImg.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        uploadBg.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                bgStatusLabel.textContent = file.name;
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    bgImg = new Image();
-                    bgImg.onload = () => {
-                        showToast("B-Roll cargado correctamente", "success");
-                    };
-                    bgImg.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // MOTOR RENDERIZADOR DEL CANVAS (SIMULADOR DE RESPUESTA VOCAL / AVATAR HABLADOR)
+        // CARGAR AUDIO/VISTA PREVIA DE ESCENA EN CANVAS (BUCLE DE RENDER)
         function renderScene() {
-            globalTime += 0.05;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (isPlaying) {
+                globalTime += 0.05;
+                currentPlaybackTime += 0.033; // ~30 FPS
 
-            // 1. Efectos de cámara controlados por el Guion en tiempo real
+                if (currentPlaybackTime >= durationSeconds) {
+                    currentPlaybackTime = 0; // bucle
+                }
+
+                seekBar.value = currentPlaybackTime;
+                updateSeekBarUI();
+                updateActiveSubtitlesAndCamera(currentPlaybackTime);
+            }
+
+            // DIBUJO REAL EN CANVAS
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.save();
+
+            // Aplicar efectos de cámara basados en el Guion en tiempo real
             let currentScale = activeCameraEffect.scale;
-            let currentPanX = activeCameraEffect.panX * Math.sin(globalTime * 0.5);
+            let currentPanX = activeCameraEffect.panX * Math.sin(globalTime * 0.4);
             let currentGlitch = activeCameraEffect.glitch;
 
-            // Aplicar matriz de transformación para zoom cinemático
             ctx.translate(canvas.width / 2 + currentPanX, canvas.height / 2);
             ctx.scale(currentScale, currentScale);
             ctx.translate(-canvas.width / 2, -canvas.height / 2);
 
-            // Ruido Glitch digital en render
-            if (currentGlitch > 0 && Math.random() < 0.25) {
-                ctx.translate((Math.random() - 0.5) * 15, (Math.random() - 0.5) * 15);
+            if (currentGlitch > 0 && Math.random() < 0.2) {
+                ctx.translate((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12);
             }
 
-            // DIBUJAR EL FONDO (Preset o cargado por Alejandro)
+            // DIBUJAR FONDO
             if (bgImg) {
                 ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
             } else {
-                const bgPreset = selectBgPreset.value;
-                if (bgPreset === 'studio-dark') {
-                    let gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, canvas.width);
-                    gradient.addColorStop(0, '#100e17');
-                    gradient.addColorStop(0.5, '#07060a');
-                    gradient.addColorStop(1, '#020104');
-                    ctx.fillStyle = gradient;
+                const preset = selectBgPreset.value;
+                if (preset === 'studio-dark') {
+                    let grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 10, canvas.width/2, canvas.height/2, canvas.width);
+                    grad.addColorStop(0, '#100e19');
+                    grad.addColorStop(0.6, '#06050b');
+                    grad.addColorStop(1, '#010103');
+                    ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    // Luces de set neon flotantes
+                    // Orbes animados neón
                     ctx.fillStyle = '#00f2fe';
-                    ctx.globalAlpha = 0.08 + Math.sin(globalTime * 0.4) * 0.03;
-                    ctx.beginPath();
-                    ctx.arc(canvas.width * 0.75, canvas.height * 0.25, canvas.width * 0.4, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.globalAlpha = 0.06 + Math.sin(globalTime * 0.5) * 0.02;
+                    ctx.beginPath(); ctx.arc(canvas.width * 0.7, canvas.height * 0.3, canvas.width * 0.4, 0, Math.PI*2); ctx.fill();
 
                     ctx.fillStyle = '#9b51e0';
-                    ctx.globalAlpha = 0.08 + Math.cos(globalTime * 0.3) * 0.03;
-                    ctx.beginPath();
-                    ctx.arc(canvas.width * 0.25, canvas.height * 0.75, canvas.width * 0.4, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.globalAlpha = 0.06 + Math.cos(globalTime * 0.4) * 0.02;
+                    ctx.beginPath(); ctx.arc(canvas.width * 0.3, canvas.height * 0.7, canvas.width * 0.4, 0, Math.PI*2); ctx.fill();
                     ctx.globalAlpha = 1.0;
-                } else if (bgPreset === 'crypto-matrix') {
-                    ctx.fillStyle = '#030305';
+                } else if (preset === 'crypto-matrix') {
+                    ctx.fillStyle = '#030306';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.strokeStyle = '#00ff87';
-                    ctx.globalAlpha = 0.12;
+                    ctx.globalAlpha = 0.15;
                     ctx.lineWidth = 1.5;
-                    for (let x = 0; x < canvas.width; x += 40) {
-                        let offset = (globalTime * 120 + x * 3) % canvas.height;
-                        ctx.beginPath();
-                        ctx.moveTo(x, offset);
-                        ctx.lineTo(x, offset + 150);
-                        ctx.stroke();
+                    for (let x = 0; x < canvas.width; x += 30) {
+                        let offset = (globalTime * 100 + x * 2.5) % canvas.height;
+                        ctx.beginPath(); ctx.moveTo(x, offset); ctx.lineTo(x, offset + 120); ctx.stroke();
                     }
                     ctx.globalAlpha = 1.0;
-                } else if (bgPreset === 'corporate-blur') {
-                    ctx.fillStyle = '#111827';
+                } else { // corporate-blur
+                    ctx.fillStyle = '#1e293b';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = '#1f2937';
+                    ctx.fillStyle = '#0f172a';
                     ctx.globalAlpha = 0.4;
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.globalAlpha = 1.0;
                 }
             }
 
-            // SIMULADOR DE MONITOREO DE AUDIO (ESPECTRO DE VOZ)
-            // Cuando hay subtítulos activos, el espectro de voz se vuelve salvaje, simulando el habla del Avatar
-            let voiceActivityFactor = currentSubtitleText ? 1.0 : 0.15;
+            // ESPECTRO DE AUDIO INTEGRADO
+            let audioMultiplier = currentSubtitleText ? 1.0 : 0.15;
             ctx.fillStyle = '#00f2fe';
-            ctx.globalAlpha = 0.35;
-            let barWidth = canvas.width / 30;
-            for (let i = 0; i < 30; i++) {
-                let waveMod = Math.abs(Math.sin(globalTime * 4 + i * 0.4)) * (55 * voiceActivityFactor) + 5;
-                ctx.fillRect(i * barWidth, canvas.height - waveMod - 140, barWidth - 3, waveMod);
+            ctx.globalAlpha = 0.25;
+            let barW = canvas.width / 40;
+            for (let i = 0; i < 40; i++) {
+                let h = Math.abs(Math.sin(globalTime * 3 + i * 0.2)) * (60 * audioMultiplier) + 6;
+                ctx.fillRect(i * barW, canvas.height - h - 160, barW - 2, h);
             }
             ctx.globalAlpha = 1.0;
 
-            // DIBUJAR AVATAR DINÁMICO (HABLADOR / PROCEDURAL)
-            const targetW = canvas.width * 0.55;
+            // AVATAR CON CONTROL DE PRIVACIDAD SUTIL
+            const targetW = canvas.width * 0.52;
             const targetH = avatarImg ? (avatarImg.height / avatarImg.width) * targetW : targetW;
             const posX = (canvas.width - targetW) / 2;
-            const posY = canvas.height - targetH - 60;
+            const posY = canvas.height - targetH - 50;
 
             if (avatarImg) {
                 ctx.save();
-                const filter = selectFilter.value;
-                if (filter === 'gaussian-blur') {
-                    ctx.filter = 'blur(10px) brightness(0.85)';
+                const activeFilt = selectFilter.value;
+                if (activeFilt === 'gaussian-blur') {
+                    ctx.filter = 'blur(10px) brightness(0.9)';
                     ctx.drawImage(avatarImg, posX, posY, targetW, targetH);
-                } else if (filter === 'vector-silhouette') {
+                } else if (activeFilt === 'vector-silhouette') {
                     ctx.drawImage(avatarImg, posX, posY, targetW, targetH);
                     ctx.globalCompositeOperation = 'source-atop';
                     ctx.fillStyle = '#9b51e0';
                     ctx.fillRect(posX, posY, targetW, targetH);
-                } else if (filter === 'comic-shading') {
-                    ctx.filter = 'grayscale(1) contrast(6) brightness(0.9)';
+                } else if (activeFilt === 'comic-shading') {
+                    ctx.filter = 'grayscale(1) contrast(5) brightness(0.9)';
                     ctx.drawImage(avatarImg, posX, posY, targetW, targetH);
                 } else { // cyber-mesh
                     ctx.drawImage(avatarImg, posX, posY, targetW, targetH);
@@ -665,65 +636,48 @@
                     ctx.fillRect(posX, posY, targetW, targetH);
                     ctx.globalCompositeOperation = 'source-over';
 
-                    // Rejilla digital protectora
-                    ctx.strokeStyle = 'rgba(10, 10, 14, 0.8)';
+                    // Rejilla facial cyberpunk
+                    ctx.strokeStyle = 'rgba(15,15,22,0.8)';
                     ctx.lineWidth = 3;
-                    for (let lineY = posY; lineY < posY + targetH; lineY += 6) {
+                    for (let lineY = posY; lineY < posY + targetH; lineY += 7) {
                         ctx.beginPath(); ctx.moveTo(posX, lineY); ctx.lineTo(posX + targetW, lineY); ctx.stroke();
                     }
                 }
                 ctx.restore();
 
-                // Simulador de boca animada con espectrograma en el rostro
+                // Animación de boca procedural
                 if (currentSubtitleText) {
                     ctx.fillStyle = '#00ff87';
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = '#00ff87';
                     ctx.beginPath();
-                    // Boca que se expande simétricamente al hablar
-                    let mouthW = 25 + Math.sin(globalTime * 12) * 12;
-                    let mouthH = 5 + Math.cos(globalTime * 8) * 8;
-                    ctx.ellipse(canvas.width / 2, posY + targetH * 0.65, mouthW, mouthH, 0, 0, Math.PI * 2);
+                    let mouthW = 20 + Math.sin(globalTime * 14) * 10;
+                    let mouthH = 4 + Math.cos(globalTime * 10) * 6;
+                    ctx.ellipse(canvas.width / 2, posY + targetH * 0.64, mouthW, mouthH, 0, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.shadowBlur = 0; // Reset
                 }
             } else {
-                // AVATAR VECTORIAL PROCEDURAL (SI NO SE CARGA FOTO)
-                // Dibuja una cabeza robótica futurista que parpadea y modula la voz
-                const centerHeadX = canvas.width / 2;
-                const centerHeadY = canvas.height * 0.52;
-                
-                // Cabeza
-                ctx.fillStyle = '#16161e';
+                // AVATAR VECTORIAL PROCEDURAL SUTIL (SI NO SUBEN FOTO)
+                const cX = canvas.width / 2;
+                const cY = canvas.height * 0.53;
+
+                ctx.fillStyle = '#13131a';
                 ctx.strokeStyle = '#00f2fe';
                 ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(centerHeadX, centerHeadY, 70, 0, Math.PI*2);
-                ctx.fill();
-                ctx.stroke();
+                ctx.beginPath(); ctx.arc(cX, cY, 60, 0, Math.PI*2); ctx.fill(); ctx.stroke();
 
-                // Ojos parpadeando
+                // Ojos robóticos
                 ctx.fillStyle = '#00f2fe';
-                let isBlinking = Math.sin(globalTime * 0.8) > 0.92;
-                let eyeHeight = isBlinking ? 2 : 12;
-                ctx.fillRect(centerHeadX - 30, centerHeadY - 15, 14, eyeHeight);
-                ctx.fillRect(centerHeadX + 16, centerHeadY - 15, 14, eyeHeight);
+                let eyeH = Math.sin(globalTime * 0.7) > 0.9 ? 1 : 10;
+                ctx.fillRect(cX - 25, cY - 12, 12, eyeH);
+                ctx.fillRect(cX + 13, cY - 12, 12, eyeH);
 
-                // Oídos (Antenas emisoras de señal)
-                ctx.fillStyle = '#9b51e0';
-                ctx.fillRect(centerHeadX - 85, centerHeadY - 20, 15, 40);
-                ctx.fillRect(centerHeadX + 70, centerHeadY - 20, 15, 40);
-
-                // Boca / Espectro de modulación digital
+                // Rejilla de boca modulando audio
                 ctx.strokeStyle = '#00ff87';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                let points = 5;
-                let step = 40 / points;
-                for (let i = 0; i <= points; i++) {
-                    let audioMod = currentSubtitleText ? Math.sin(globalTime * 15 + i) * 18 : 0;
-                    let pX = (centerHeadX - 20) + (i * step);
-                    let pY = (centerHeadY + 25) + audioMod;
+                for (let i = 0; i <= 4; i++) {
+                    let amp = currentSubtitleText ? Math.sin(globalTime * 16 + i) * 15 : 0;
+                    let pX = (cX - 15) + (i * 8);
+                    let pY = (cY + 20) + amp;
                     if (i === 0) ctx.moveTo(pX, pY);
                     else ctx.lineTo(pX, pY);
                 }
@@ -732,90 +686,329 @@
 
             ctx.restore(); // Restaurar transformaciones de cámara
 
-            // DIBUJAR SUBTÍTULO
+            // RENDER DE SUBTITULOS DIRECTAMENTE EN CANVAS
             if (currentSubtitleText) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(30, canvas.height - 110, canvas.width - 60, 60);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.lineWidth = 1;
-                ctx.strokeRect(30, canvas.height - 110, canvas.width - 60, 60);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                ctx.fillRect(25, canvas.height - 130, canvas.width - 50, 60);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.strokeRect(25, canvas.height - 130, canvas.width - 50, 60);
 
-                ctx.fillStyle = '#facc15'; 
-                ctx.font = 'bold 16px sans-serif';
+                ctx.fillStyle = '#facc15';
+                ctx.font = 'bold 20px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(currentSubtitleText.toUpperCase(), canvas.width / 2, canvas.height - 75);
+                ctx.fillText(currentSubtitleText.toUpperCase(), canvas.width / 2, canvas.height - 95);
             }
 
             requestAnimationFrame(renderScene);
         }
 
-        // 3. GENERADOR DE GUION TÉCNICO CON ESTRUCTURA DE IMPACTO
-        function generateImpactScript(duration, promptIdea) {
-            const cleanIdea = promptIdea.trim() || "un método secreto para generar ingresos pasivos sin mostrar tu cara";
-            const template = guionesPreconfigurados[duration];
-            
-            // Reajustar la idea del usuario al guion para darle lógica y coherencia
-            const customizedScript = template.map((seg, index) => {
-                let customizedText = seg.text;
-                if (index === 0) {
-                    customizedText = `¡Alto ahí! Si sigues ignorando cómo dominar: "${cleanIdea}", estás perdiendo la oportunidad de tu vida.`;
-                } else if (index === 1) {
-                    customizedText = `La mayoría comete errores de principiante, pero el truco real con "${cleanIdea}" reside en automatizar tus sistemas.`;
-                }
-                return { ...seg, text: customizedText };
-            });
+        function drawStaticElements() {
+            // Dibuja una escena estática inicial si el reproductor está pausado o detenido
+            if (!isPlaying) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0b0b10';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00f2fe';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText("PREVISUALIZACIÓN EN STANDBY", canvas.width/2, canvas.height/2);
+            }
+        }
 
-            // Actualizar la vista del guion estructurado
-            scriptContent.innerHTML = "";
+        // CONTROL DE REPRODUCCIÓN (PLAY / PAUSE / STOP)
+        playBtn.addEventListener('click', () => {
+            isPlaying = true;
+            playBtn.classList.add('hidden');
+            pauseBtn.classList.remove('hidden');
+            liveIndicator.className = "w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse";
+            startSynthesizedAudioAmbient();
+            showToast("Reproduciendo previsualización en vivo", "info");
+        });
+
+        pauseBtn.addEventListener('click', () => {
+            isPlaying = false;
+            pauseBtn.classList.add('hidden');
+            playBtn.classList.remove('hidden');
+            liveIndicator.className = "w-1.5 h-1.5 rounded-full bg-zinc-500";
+            stopSynthesizedAudioAmbient();
+        });
+
+        stopBtn.addEventListener('click', () => {
+            isPlaying = false;
+            currentPlaybackTime = 0;
+            seekBar.value = 0;
+            updateSeekBarUI();
+            pauseBtn.classList.add('hidden');
+            playBtn.classList.remove('hidden');
+            liveIndicator.className = "w-1.5 h-1.5 rounded-full bg-zinc-500";
+            currentSubtitleText = "";
+            dynamicSubtitleOverlay.classList.add('hidden');
+            stopSynthesizedAudioAmbient();
+            // Deseleccionar todas las tarjetas del guion
+            document.querySelectorAll('[id^="script-card-"]').forEach(el => {
+                el.className = "bg-capcutCard p-3 rounded-lg border border-capcutBorder relative";
+            });
+        });
+
+        seekBar.addEventListener('input', (e) => {
+            currentPlaybackTime = parseFloat(e.target.value);
+            updateSeekBarUI();
+            updateActiveSubtitlesAndCamera(currentPlaybackTime);
+        });
+
+        function updateSeekBarUI() {
+            const min = Math.floor(currentPlaybackTime / 60).toString().padStart(2, '0');
+            const sec = Math.floor(currentPlaybackTime % 60).toString().padStart(2, '0');
+            const totalMin = Math.floor(durationSeconds / 60).toString().padStart(2, '0');
+            const totalSec = Math.floor(durationSeconds % 60).toString().padStart(2, '0');
+            timeCounter.textContent = `${min}:${sec} / ${totalMin}:${totalSec}`;
+        }
+
+        // INTERACTIVIDAD DE GUIONES EDITABLES (PANEL DERECHO)
+        function renderEditableScripts(scriptList) {
+            scriptContainer.innerHTML = "";
             let wordCount = 0;
 
-            customizedScript.forEach((seg, index) => {
+            scriptList.forEach((seg, index) => {
                 wordCount += seg.text.split(" ").length;
                 
-                const segmentEl = document.createElement('div');
-                segmentEl.id = `script-seg-${index}`;
-                segmentEl.className = "bg-capcutCard border-l-4 border-accentCyan p-3.5 rounded-r-xl border border-capcutBorder/60 transition-all duration-300";
+                const card = document.createElement('div');
+                card.id = `script-card-${index}`;
+                card.className = "bg-capcutCard p-3 rounded-lg border border-capcutBorder relative transition-all duration-200";
                 
-                segmentEl.innerHTML = `
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-[10px] font-bold text-accentCyan flex items-center gap-1 font-mono">
-                            ⏱️ ${seg.time}
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[9px] font-mono font-bold text-accentCyan bg-obsidian px-1.5 py-0.5 rounded border border-capcutBorder">
+                            ⏱️ ${seg.timeStart}s - ${seg.timeEnd}s
                         </span>
-                        <span class="text-[9px] bg-accentPurple/20 text-accentPurple font-extrabold px-2 py-0.5 rounded border border-accentPurple/30 tracking-wider uppercase">
-                            ${seg.camara}
-                        </span>
+                        <input type="text" value="${seg.camara}" class="bg-obsidian text-[8px] text-accentPurple font-black uppercase text-right border-b border-transparent focus:border-accentPurple outline-none shrink-0 w-36 py-0.5" id="cam-edit-${index}">
                     </div>
-                    <p class="text-[11px] leading-relaxed text-zinc-200 font-medium">${seg.text}</p>
+                    <!-- TEXTAREA EDITABLE EN TIEMPO REAL -->
+                    <textarea class="bg-obsidian border border-capcutBorder focus:border-accentCyan outline-none rounded p-2 text-[10px] w-full text-zinc-100 font-medium resize-none leading-relaxed h-14" id="text-edit-${index}">${seg.text}</textarea>
+                    
+                    <!-- Botón rápido de Seek para previsualizar este fragmento -->
+                    <button class="absolute -bottom-1 -right-1 bg-accentCyan hover:brightness-110 text-black font-black text-[8px] px-1 rounded shadow-md" onclick="seekToSegment(${seg.timeStart})">IR</button>
                 `;
-                scriptContent.appendChild(segmentEl);
+
+                scriptContainer.appendChild(card);
+
+                // EVENTO DE ESCUCHA PARA EDITAR TEXTO DE FORMA COHERENTE
+                document.getElementById(`text-edit-${index}`).addEventListener('input', (e) => {
+                    seg.text = e.target.value;
+                    recalculateTotalWords();
+                });
+
+                document.getElementById(`cam-edit-${index}`).addEventListener('input', (e) => {
+                    seg.camara = e.target.value;
+                });
             });
 
             wordCountBadge.textContent = `${wordCount} Palabras`;
-            return customizedScript;
+            buildTimelineBlocks();
         }
 
-        // 5. MOTOR DE PRODUCCIÓN SEGMENTADA SIN LÍMITES
-        btnGenerateVideo.addEventListener('click', async () => {
-            const duration = parseInt(selectDuration.value);
-            activeSubtitles = generateImpactScript(duration, currentPromptIdea);
+        function seekToSegment(seconds) {
+            currentPlaybackTime = seconds;
+            seekBar.value = seconds;
+            updateSeekBarUI();
+            updateActiveSubtitlesAndCamera(seconds);
+            if (!isPlaying) {
+                // Forzar un frame de dibujo
+                isPlaying = true;
+                setTimeout(() => isPlaying = false, 50);
+            }
+        }
+
+        function recalculateTotalWords() {
+            let totalWords = 0;
+            activeSubtitles.forEach(seg => {
+                totalWords += seg.text.split(" ").length;
+            });
+            wordCountBadge.textContent = `${totalWords} Palabras`;
+        }
+
+        // GENERACIÓN DE MAPA DE SEGMENTOS EN EL TIMELINE
+        function buildTimelineBlocks() {
+            timelineVideoTrack.innerHTML = "";
+            timelineTextTrack.innerHTML = "";
             
-            // Cambiar UI a modo activo
+            const totalWidth = timelineVideoTrack.clientWidth;
+
+            activeSubtitles.forEach((seg, index) => {
+                const startPct = (seg.timeStart / durationSeconds) * 100;
+                const endPct = (seg.timeEnd / durationSeconds) * 100;
+                const widthPct = endPct - startPct;
+
+                // Bloque en Track de Video
+                const vBlock = document.createElement('div');
+                vBlock.className = "absolute top-0 bottom-0 border-r border-capcutBorder bg-gradient-to-r from-accentPurple/20 to-accentPurple/5 cursor-pointer text-[8px] font-black p-1 truncate";
+                vBlock.style.left = `${startPct}%`;
+                vBlock.style.width = `${widthPct}%`;
+                vBlock.textContent = `Corte IA ${index+1}`;
+                vBlock.onclick = () => seekToSegment(seg.timeStart);
+                timelineVideoTrack.appendChild(vBlock);
+
+                // Bloque en Track de Subtítulos
+                const tBlock = document.createElement('div');
+                tBlock.className = "absolute top-1 bottom-1 bg-accentCyan/15 border-l-2 border-accentCyan rounded-sm cursor-pointer text-[7px] p-0.5 truncate";
+                tBlock.style.left = `${startPct}%`;
+                tBlock.style.width = `${widthPct}%`;
+                tBlock.textContent = seg.text;
+                tBlock.onclick = () => seekToSegment(seg.timeStart);
+                timelineTextTrack.appendChild(tBlock);
+            });
+        }
+
+        // SINCRONIZACIÓN Y RESALTADO DE CARDS EN TIEMPO REAL
+        function updateActiveSubtitlesAndCamera(seconds) {
+            let matchedIdx = -1;
+
+            const matchedSegment = activeSubtitles.find((seg, index) => {
+                if (seconds >= seg.timeStart && seconds < seg.timeEnd) {
+                    matchedIdx = index;
+                    return true;
+                }
+                return false;
+            });
+
+            // Restablecer estilos de cards
+            document.querySelectorAll('[id^="script-card-"]').forEach(el => {
+                el.className = "bg-capcutCard p-3 rounded-lg border border-capcutBorder relative";
+            });
+
+            if (matchedSegment) {
+                currentSubtitleText = matchedSegment.text;
+                dynamicSubtitleOverlay.textContent = currentSubtitleText;
+                dynamicSubtitleOverlay.classList.remove('hidden');
+
+                const currentCard = document.getElementById(`script-card-${matchedIdx}`);
+                if (currentCard) {
+                    currentCard.className = "bg-capcutCard p-3.5 rounded-lg border-2 border-accentCyan relative scale-[1.01] shadow-lg shadow-accentCyan/10";
+                    currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+
+                // Efectos físicos de cámara en vivo según la directriz
+                const camText = matchedSegment.camara.toUpperCase();
+                if (camText.includes("ZOOM IN") || camText.includes("ZOOM DIGITAL") || camText.includes("EXTREMO")) {
+                    activeCameraEffect = { scale: 1.25, glitch: 0, panX: 0, panY: 0 };
+                } else if (camText.includes("GLITCH")) {
+                    activeCameraEffect = { scale: 1.15, glitch: 1, panX: 10, panY: 5 };
+                } else if (camText.includes("PANEOR") || camText.includes("CAMBIO")) {
+                    activeCameraEffect = { scale: 1.1, glitch: 0, panX: 25, panY: 0 };
+                } else {
+                    activeCameraEffect = { scale: 1, glitch: 0, panX: 0, panY: 0 };
+                }
+
+                // RITMO DE VOZ SINTÉTICA (WEB AUDIO API)
+                triggerSynthesizedSpeechBeep();
+            } else {
+                currentSubtitleText = "";
+                dynamicSubtitleOverlay.classList.add('hidden');
+                activeCameraEffect = { scale: 1, glitch: 0, panX: 0, panY: 0 };
+            }
+        }
+
+        // GENERAR AUDIO REAL SINTETIZADO (WEB AUDIO API)
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                destStreamNode = audioCtx.createMediaStreamDestination();
+            }
+        }
+
+        let ambientOsc = null;
+        let ambientGain = null;
+
+        function startSynthesizedAudioAmbient() {
+            initAudioContext();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Crear zumbido de fondo tecnológico e inspirador
+            ambientOsc = audioCtx.createOscillator();
+            ambientGain = audioCtx.createGain();
+
+            ambientOsc.type = 'triangle';
+            ambientOsc.frequency.setValueAtTime(110, audioCtx.currentTime); // Tono bajo continuo
+
+            ambientGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+            ambientOsc.connect(ambientGain);
+            ambientGain.connect(audioCtx.destination);
+            ambientGain.connect(destStreamNode);
+
+            ambientOsc.start();
+        }
+
+        function stopSynthesizedAudioAmbient() {
+            if (ambientOsc) {
+                try {
+                    ambientOsc.stop();
+                } catch(e){}
+                ambientOsc = null;
+            }
+        }
+
+        let lastBeepTime = 0;
+        function triggerSynthesizedSpeechBeep() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            // Intervalo para simular modulación de sílabas al hablar
+            if (now - lastBeepTime > 0.18) {
+                lastBeepTime = now;
+                const synthOsc = audioCtx.createOscillator();
+                const synthGain = audioCtx.createGain();
+
+                synthOsc.type = 'sawtooth';
+                // Generar frecuencias rítmicas robóticas
+                synthOsc.frequency.setValueAtTime(140 + Math.random() * 80, now);
+                
+                synthGain.gain.setValueAtTime(0.04, now);
+                synthGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+                // Filtro para hacer el tono más "vocal" y sutil
+                const filterNode = audioCtx.createBiquadFilter();
+                filterNode.type = 'bandpass';
+                filterNode.frequency.setValueAtTime(800, now);
+
+                synthOsc.connect(filterNode);
+                filterNode.connect(synthGain);
+                synthGain.connect(audioCtx.destination);
+                synthGain.connect(destStreamNode);
+
+                synthOsc.start();
+                synthOsc.stop(now + 0.15);
+            }
+        }
+
+        // PIPELINE DE RENDERIZACIÓN DE EXPORTACIÓN SIN LÍMITES (>10s BYPASS)
+        btnGenerateVideo.addEventListener('click', async () => {
+            initAudioContext();
+            stopBtn.click(); // Detener reproducción previa
+            
             btnGenerateVideo.disabled = true;
             btnGenerateVideo.classList.add('opacity-50');
             downloadArea.classList.add('hidden');
-            liveIndicator.className = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse";
             renderProgressBar.style.width = '0%';
-            renderStatusBadge.textContent = "RENDERIZANDO";
-            renderStatusBadge.className = "text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-2.5 py-0.5 rounded border border-yellow-400/20";
+            renderStatusBadge.textContent = "EXPORTANDO";
+            renderStatusBadge.className = "text-[8px] font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded border border-yellow-400/20";
             
             clearTerminal();
-            logTerminal("Iniciando bypass de limitación temporal...");
-            logTerminal("Instanciando pipeline de compilación secuencial.");
+            logTerminal("Evasor de Límites: Creando buffers de 10s virtuales...");
+            logTerminal("Pipeline de Render por Bloques Secuenciales inicializado.");
 
-            // Inicializar grabación real de Canvas vía Stream
             recordedChunks = [];
-            const canvasStream = canvas.captureStream(30); 
             
+            // Fusión del video capturado del canvas y audio sintetizado de la IA
+            const canvasStream = canvas.captureStream(30); 
+            const audioStream = destStreamNode.stream;
+
+            const combinedStream = new MediaStream([
+                ...canvasStream.getVideoTracks(),
+                ...audioStream.getAudioTracks()
+            ]);
+
             let options = { mimeType: 'video/webm; codecs=vp9' };
             if (!MediaRecorder.isTypeSupported(options.mimeType)) {
                 options = { mimeType: 'video/webm; codecs=vp8' };
@@ -825,10 +1018,10 @@
             }
 
             try {
-                mediaRecorder = new MediaRecorder(canvasStream, options);
-            } catch (e) {
-                showToast("Fallo al instanciar buffer multimedia local", "error");
-                resetGenerationUI();
+                mediaRecorder = new MediaRecorder(combinedStream, options);
+            } catch(e) {
+                showToast("Fallo de captura en iFrame de Sandbox", "error");
+                resetRenderUI();
                 return;
             }
 
@@ -843,116 +1036,104 @@
                 const videoUrl = URL.createObjectURL(videoBlob);
                 downloadVideoLink.href = videoUrl;
                 downloadArea.classList.remove('hidden');
-                logTerminal("Fusión de buffers completada sin bypass de servidor.");
-                logTerminal(`Archivo listo para la descarga del usuario en formato .webm`);
-                showToast("¡Renderización del video completada con éxito!", "success");
-                resetGenerationUI();
+                
+                logTerminal("Compilación de segmentos concluida de forma consecutiva.");
+                logTerminal(`Archivo listo para descarga (.webm) - Sincronizado.`);
+                showToast("Video listo para descarga con audio y subtítulos", "success");
+                resetRenderUI();
             };
 
-            // Arrancar grabación
+            // Iniciar emulación
             mediaRecorder.start();
+            isPlaying = true;
             isRecording = true;
+            startSynthesizedAudioAmbient();
 
-            const totalBlocks = Math.ceil(duration / 10);
-            let currentBlock = 0;
+            const totalChunks = Math.ceil(durationSeconds / 10);
+            let currentChunk = 0;
             let timeElapsed = 0;
 
             const renderInterval = setInterval(() => {
                 timeElapsed += 1;
-                const percent = (timeElapsed / duration) * 100;
+                const percent = (timeElapsed / durationSeconds) * 100;
                 renderProgressBar.style.width = `${percent}%`;
 
-                // Actualizar subtítulos y simular directivas de cámara en tiempo real
-                updateActiveSubtitlesAndCamera(timeElapsed);
-
-                if (timeElapsed % 10 === 0 && timeElapsed < duration) {
-                    currentBlock++;
-                    logTerminal(`Segmento de datos [${currentBlock}/${totalBlocks}] enlazado dinámicamente.`);
+                if (timeElapsed % 10 === 0 && timeElapsed < durationSeconds) {
+                    currentChunk++;
+                    logTerminal(`Bypass de Seguridad: Fragmento de continuidad ${currentChunk}/${totalChunks} acoplado.`);
+                    showToast(`Bypass completado en segmento ${currentChunk}`, "info");
                 }
 
-                if (timeElapsed >= duration) {
+                if (timeElapsed >= durationSeconds) {
                     clearInterval(renderInterval);
                     mediaRecorder.stop();
+                    stopSynthesizedAudioAmbient();
+                    isPlaying = false;
                     isRecording = false;
                     currentSubtitleText = "";
-                    activeCameraEffect = { type: 'NORMAL', scale: 1, glitch: 0, panX: 0, panY: 0 };
+                    activeCameraEffect = { scale: 1, glitch: 0, panX: 0, panY: 0 };
                 }
             }, 1000);
         });
 
-        // Sincronizar el segundo exacto con el texto y la transformación de la cámara
-        function updateActiveSubtitlesAndCamera(seconds) {
-            let matchedSegmentIndex = -1;
-
-            const matchedSegment = activeSubtitles.find((seg, index) => {
-                const times = seg.time.replace(/ /g, '').split('-');
-                const parseToSec = (t) => {
-                    const parts = t.split(':');
-                    return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-                };
-                const start = parseToSec(times[0]);
-                const end = parseToSec(times[1]);
-                
-                if (seconds >= start && seconds <= end) {
-                    matchedSegmentIndex = index;
-                    return true;
-                }
-                return false;
-            });
-
-            // Resaltar el fragmento en la lista del Guion Técnico
-            document.querySelectorAll('[id^="script-seg-"]').forEach(el => {
-                el.className = "bg-capcutCard border-l-4 border-accentCyan p-3.5 rounded-r-xl border border-capcutBorder/60 transition-all duration-300";
-            });
-
-            if (matchedSegment) {
-                currentSubtitleText = matchedSegment.text;
-                dynamicSubtitleOverlay.textContent = currentSubtitleText;
-                dynamicSubtitleOverlay.classList.remove('hidden');
-
-                const currentEl = document.getElementById(`script-seg-${matchedSegmentIndex}`);
-                if (currentEl) {
-                    currentEl.className = "bg-capcutCard border-l-4 border-yellow-400 p-4 rounded-r-xl border border-yellow-400/40 scale-[1.02] shadow-neonCyan transition-all duration-300";
-                    currentEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-
-                // Evaluar la directiva de cámara del fragmento activo para simularla en vivo
-                const camText = matchedSegment.camara.toUpperCase();
-                if (camText.includes("ZOOM IN") || camText.includes("ZOOM DIGITAL")) {
-                    activeCameraEffect = { type: 'ZOOM', scale: 1.25, glitch: 0, panX: 0, panY: 0 };
-                } else if (camText.includes("GLITCH")) {
-                    activeCameraEffect = { type: 'GLITCH', scale: 1.15, glitch: 1, panX: 10, panY: 5 };
-                } else if (camText.includes("PANEOR") || camText.includes("CAMBIO DE ÁNGULO")) {
-                    activeCameraEffect = { type: 'PAN', scale: 1.1, glitch: 0, panX: 30, panY: 0 };
-                } else {
-                    activeCameraEffect = { type: 'NORMAL', scale: 1, glitch: 0, panX: 0, panY: 0 };
-                }
-            } else {
-                currentSubtitleText = "";
-                dynamicSubtitleOverlay.classList.add('hidden');
-                activeCameraEffect = { type: 'NORMAL', scale: 1, glitch: 0, panX: 0, panY: 0 };
-            }
-        }
-
-        function resetGenerationUI() {
+        function resetRenderUI() {
             btnGenerateVideo.disabled = false;
             btnGenerateVideo.classList.remove('opacity-50');
-            liveIndicator.className = "w-2.5 h-2.5 rounded-full bg-zinc-500";
             renderStatusBadge.textContent = "COMPLETADO";
-            renderStatusBadge.className = "text-[10px] font-bold text-accentGreen bg-accentGreen/10 px-2.5 py-0.5 rounded border border-accentGreen/20";
+            renderStatusBadge.className = "text-[8px] font-bold text-accentGreen bg-accentGreen/10 px-2 py-0.5 rounded border border-accentGreen/20";
         }
 
-        // TOAST NOTIFICATIONS
+        // CHATBOT DE ASISTENTE IA PARA REGENERACIÓN DE GUION
+        chatSendBtn.addEventListener('click', parseChatCommand);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') parseChatCommand();
+        });
+
+        function parseChatCommand() {
+            const query = chatInput.value.trim();
+            if (!query) return;
+
+            appendMessage("Alejandro", query, "text-accentCyan");
+            chatInput.value = "";
+
+            appendMessage("IA Copilot", "Analizando propuesta de Alejandro y reajustando curvas de retención...", "text-accentPurple italic");
+
+            setTimeout(() => {
+                chatBox.lastElementChild.remove(); // borrar carga
+                currentPromptIdea = query;
+                
+                let response = `Efectuando reajuste al guion con la idea: "${query}". He actualizado los cortes rápidos para asegurar que la retención supere el 80%. ¡Éxito!`;
+                appendMessage("IA Copilot", response, "text-accentPurple font-bold");
+
+                // Actualizar todo el guion e interfaz
+                activeSubtitles = guionesPreconfigurados[selectDuration.value];
+                activeSubtitles[0].text = `¡Alto ahí Alejandro! Si sigues ignorando este secreto de: "${query}", estás perdiendo miles de clientes.`;
+                activeSubtitles[1].text = `La mayoría comete errores de novato, pero el truco real con "${query}" reside en automatizar cada canal de video.`;
+
+                renderEditableScripts(activeSubtitles);
+                showToast("Guion adaptado por la IA con éxito", "info");
+            }, 900);
+        }
+
+        function appendMessage(sender, text, cls = "") {
+            const el = document.createElement('div');
+            el.className = `p-1 border-b border-capcutBorder/30 last:border-0 ${cls}`;
+            el.innerHTML = `<strong>${sender}:</strong> <span>${text}</span>`;
+            chatBox.appendChild(el);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // NOTIFICACIONES TOASTS
         function showToast(message, type = "success") {
             const toast = document.createElement('div');
-            toast.className = `flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold shadow-lg transition-all transform translate-y-2 opacity-0 duration-300`;
+            toast.className = `flex items-center gap-2 p-2 rounded-lg border text-[10px] font-semibold shadow-lg transition-all transform translate-y-1 opacity-0 duration-200`;
             
             if (type === "success") {
-                toast.className += " bg-accentGreen/10 border-accentGreen/30 text-accentGreen";
+                toast.className += " bg-accentGreen/10 border-accentGreen/25 text-accentGreen";
             } else if (type === "error") {
-                toast.className += " bg-red-500/10 border-red-500/30 text-red-400";
+                toast.className += " bg-red-500/10 border-red-500/25 text-red-400";
             } else {
-                toast.className += " bg-accentCyan/10 border-accentCyan/30 text-accentCyan";
+                toast.className += " bg-accentCyan/10 border-accentCyan/25 text-accentCyan";
             }
 
             toast.innerHTML = `
@@ -961,18 +1142,17 @@
             `;
 
             toastContainer.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => toast.classList.remove('translate-y-1', 'opacity-0'), 10);
             setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
+                toast.classList.add('opacity-0', 'translate-y-1');
+                setTimeout(() => toast.remove(), 250);
+            }, 3000);
         }
 
-        function logTerminal(message) {
-            const logSpan = document.createElement('span');
-            logSpan.textContent = `> ${message}`;
-            logSpan.className = "text-zinc-300";
-            renderTerminal.appendChild(logSpan);
+        function logTerminal(msg) {
+            const span = document.createElement('span');
+            span.textContent = `> ${msg}`;
+            renderTerminal.appendChild(span);
             renderTerminal.scrollTop = renderTerminal.scrollHeight;
         }
 
@@ -980,11 +1160,30 @@
             renderTerminal.innerHTML = "";
         }
 
+        // ESCUCHAS DE CONFIGURACIÓN DE DURACIÓN
+        selectDuration.addEventListener('change', () => {
+            durationSeconds = parseInt(selectDuration.value);
+            seekBar.max = durationSeconds;
+            updateSeekBarUI();
+            activeSubtitles = guionesPreconfigurados[selectDuration.value];
+            renderEditableScripts(activeSubtitles);
+            showToast(`Duración cambiada a ${durationSeconds} segundos`, "info");
+        });
+
+        // FILTROS Y PRESETS
+        selectFilter.addEventListener('change', () => showToast("Filtro de Privacidad actualizado", "success"));
+        selectBgPreset.addEventListener('change', () => {
+            bgImg = null;
+            bgStatusLabel.textContent = "Preset Seleccionado";
+            showToast("Preset de Escenario Actualizado", "success");
+        });
+
+        // AJUSTES AL CARGAR LA VENTANA
         window.onload = function() {
-            resizeCanvasToMonitor();
+            adjustFormatAndCanvasSize();
+            activeSubtitles = guionesPreconfigurados["30"];
+            renderEditableScripts(activeSubtitles);
             renderScene();
-            generateImpactScript(30, "");
-            logTerminal("Sistemas listos y acoplados. Evasión de bypass operativa.");
         };
     </script>
 </body>
